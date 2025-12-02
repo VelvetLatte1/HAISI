@@ -226,6 +226,32 @@ HAISI/
 
 ---
 
+### project
+
+#### `front_page.html`
+
+* 首页。
+
+---
+
+#### `museum.html`
+
+* 电子博物馆页面。
+
+---
+
+#### `splat/load_gs_scene.html`
+
+* 加载gs场景的示例。
+
+---
+
+#### `mesh/load_tiles.html`
+
+* 加载mesh场景的示例。
+
+---
+
 ### 目录说明
 
 #### `.idea/`
@@ -245,18 +271,6 @@ HAISI/
   * 公共 UI 相关工具。
 
 建议将**与具体业务相对无关、可复用**的代码放在这里，方便跨项目复用。
-
----
-
-#### `project/`
-
-* 存放与当前项目强关联的资源，例如：
-
-  * 某个具体场景的配置（如图层列表、样式配置）；
-  * 示例数据；
-  * 特定业务脚本。
-
-当项目变复杂时，可以在此目录下按功能再划分子目录（如 `config/`、`styles/`、`examples/` 等）。
 
 ---
 
@@ -284,6 +298,7 @@ HAISI/
   * 3dgs场景：`public/splat/*.splat` 等；
   * 图片：`public/images/*.png`、`*.jpg`；
   * mesh场景：`public/sanjiangkou/`、`public/jingdian_tiles/ship`。
+  * 视频：`public/videos`
 
 公共约定：**前端代码里用的路径以 `public/` 开头**，方便统一管理。
 
