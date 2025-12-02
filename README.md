@@ -162,10 +162,6 @@ HAISI/
 
   * 创建 maptalks Map / Cesium Viewer；
   * 设置底图、坐标系、初始视角等。
-* 从 `public/` 目录加载数据
-
-  * 通过 `fetch('public/data/xxx.json')` 读取业务数据、配置文件；
-  * 将数据转换为图层（点、线、面）、标记或其他可视元素。
 * 绑定交互逻辑
 
   * 地图缩放、拖拽、选中、鼠标悬停；
