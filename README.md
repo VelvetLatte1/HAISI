@@ -7,3 +7,4 @@
 npm install maptalks --save
 
 ```
+# HAISI

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>电子博物馆 - 三江口海上丝绸之路</title>
+
+    <!-- ECharts 图表库 -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
+
+    <!-- Bootstrap，用于基础样式（本页用得不多，但保留无妨） -->
+    <link 
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    />
+
+    <style>
+        body {
+            background-color: #1e2b3a;
+            color: #a0a4b8;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* 页面主容器 */
+        .container {
+            padding: 20px;
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        /* 标题区域 */
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #29b6f6;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        /* 场景卡片布局 */
+        .content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        /* 单个场景卡片 */
+        .scene-info {
+            flex: 1 1 300px;
+            background-color: #1a2236;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            text-align: center;
+
+            cursor: pointer;
+            user-select: none;
+
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .scene-info:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+        }
+
+        .scene-info img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .scene-info h3 {
+            color: #29b6f6;
+            margin-bottom: 10px;
+        }
+
+        .scene-info p {
+            color: #b0bec5;
+            line-height: 1.6;
+        }
+
+        /* 图表容器 */
+        #chartContainer {
+            width: 100%;
+            min-height: 300px;
+            background-color: #1a2236;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 30px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- 顶部标题 -->
+        <div class="header">
+            <h1>三江口海上丝绸之路电子博物馆</h1>
+            <p>探索丝绸之路上的精彩场景，了解历史文化背景。</p>
+        </div>
+
+        <!-- 场景卡片 -->
+        <div class="content">
+
+            <!-- 卡片 1：GS 展示 -->
+            <div 
+                class="scene-info"
+                data-url="../project/splat/load_gs_scene.html"
+            >
+                <img 
+                    src="../public/images/庆安会馆.jpeg" 
+                    alt="GS 场景"
+                    onerror="this.src='../public/images/default.png'"
+                />
+                <h3>3D-GS</h3>
+                <p>GS Splatting 模型展示方法</p>
+            </div>
+
+            <!-- 卡片 2：3D Tiles 展示 -->
+            <div 
+                class="scene-info"
+                data-url="../project/mesh/jingdian_sub_1.html"
+            >
+                <img 
+                    src="../public/images/tiles_scene.jpg" 
+                    alt="3D Tiles 场景"
+                    onerror="this.src='../public/images/default.png'"
+                />
+                <h3>3D Tiles</h3>
+                <p>基于 3D Tiles 的三维场景展示</p>
+            </div>
+
+            <!-- 卡片 3：空位 -->
+            <div class="scene-info">
+                <img 
+                    src="../public/images/coming_soon.jpg" 
+                    alt="暂无内容"
+                    onerror="this.src='../public/images/default.png'"
+                />
+                <h3>Coming Soon</h3>
+                <p>更多展示内容正在建设中……</p>
+            </div>
+        </div>
+
+        <!-- 图表展示区域 -->
+        <div id="chartContainer"></div>
+    </div>
+
+    <script>
+        /* -----------卡片点击跳转----------- */
+        document.querySelectorAll(".scene-info[data-url]").forEach(card => {
+            card.addEventListener("click", () => {
+                const url = card.getAttribute("data-url");
+                window.location.href = url;
+            });
+        });
+
+        /* -----------ECharts 图表----------- */
+        const chartContainer = document.getElementById('chartContainer');
+        const myChart = echarts.init(chartContainer);
+
+        const option = {
+            title: {
+                text: '不同场景访问量统计',
+                left: 'center',
+                textStyle: {
+                    color: '#29b6f6',
+                    fontSize: 18
+                }
+            },
+            tooltip: {
+                trigger: 'axis',
+                backgroundColor: 'rgba(0,0,0,0.7)',
+                borderColor: '#29b6f6',
+                textStyle: {
+                    color: '#b0bec5'
+                }
+            },
+            xAxis: {
+                type: 'category',
+                data: ['古代港口', '航海冒险', '瓷器与丝绸'],
+                axisLine: {
+                    lineStyle: { color: '#b0bec5' }
+                }
+            },
+            yAxis: {
+                type: 'value',
+                axisLine: {
+                    lineStyle: { color: '#b0bec5' }
+                }
+            },
+            series: [{
+                data: [3000, 2400, 2800],
+                type: 'bar',
+                itemStyle: { color: '#29b6f6' },
+                barWidth: '60%'
+            }]
+        };
+
+        myChart.setOption(option);
+    </script>
+
+</body>
+</html>

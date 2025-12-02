@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <!-- 网页编码：保证中文不乱码 -->
+    <meta charset="UTF-8" />
+    <!-- 视口设置：适配手机 / 平板 / PC -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>三江口海上丝绸之路 - 首页</title>
+
+    <!--
+      如需使用 Bootstrap，可以取消注释下面一行；
+      当前页面只全屏播放视频，Bootstrap 不是必须。
+    -->
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" /> -->
+
+    <!-- Hls.js：用于在大多数浏览器中播放 .m3u8(HLS) 视频流 -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+    <style>
+        /* ===== 页面整体样式：全屏、居中、深色背景 ===== */
+        body {
+            background-color: #1e2b3a;
+            color: #a0a4b8;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+
+            /* 使用 flex 居中“加载中”提示 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            /* 占满一屏高度（这里是一整个 iframe 的高度） */
+            height: 100vh;
+
+            /* 不允许滚动 */
+            overflow: hidden;
+        }
+
+        /* ===== 视频容器：占满整个 body 区域 ===== */
+        .video-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        /* video 元素铺满整个容器，按比例裁剪 */
+        .video-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;   /* 等比例放大，超出部分裁剪，铺满背景 */
+            background-color: #000;
+        }
+
+        /* ===== 加载提示容器：初始居中显示 ===== */
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+
+            /* 占满整个视口高度 */
+            height: 100vh;
+        }
+
+        .loading-message {
+            font-size: 1.5rem;
+            color: #ffffff;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- ===== 初始“加载中”提示区域 ===== -->
+    <div class="loading-container" id="loadingContainer">
+        <div class="loading-message">视频加载中，请稍候...</div>
+    </div>
+
+    <!-- ===== 视频容器：初始隐藏，待视频准备好后再显示 ===== -->
+    <div class="video-container" id="videoContainer" style="display: none;">
+        <!--
+          muted：静音（现代浏览器通常只允许静音视频自动播放）
+          loop：循环播放
+          playsinline：移动端内联播放，不强制全屏
+          preload="auto"：尽早预加载视频
+        -->
+        <video
+            id="backgroundVideo"
+            muted
+            loop
+            playsinline
+            preload="auto"
+        ></video>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const videoElement = document.getElementById('backgroundVideo');
+            const loadingContainer = document.getElementById('loadingContainer');
+            const videoContainer = document.getElementById('videoContainer');
+
+            // HLS 视频流地址：
+            // 注意：这是相对当前 front_page.html 所在路径的相对路径
+            // 当前假设：/project/front_page.html
+            // ../public/videos/... => /public/videos/...
+            const hlsUrl = '../public/videos/shouyezhanshi/master.m3u8';
+
+            // 情况一：浏览器支持 Hls.js（大多数桌面 / 安卓浏览器）
+            if (window.Hls && Hls.isSupported()) {
+                const hls = new Hls({
+                    maxBufferLength: 60,             // 最大缓冲时长（秒）
+                    maxBufferSize: 60 * 1024 * 1024, // 最大缓冲大小（字节）
+                    maxMaxBufferLength: 120,
+                    startLevel: 0                    // 从最低清晰度开始，提高初始加载速度
+                });
+
+                // 加载 HLS 视频流
+                hls.loadSource(hlsUrl);
+
+                // 将 HLS 媒体绑定到 video 元素
+                hls.attachMedia(videoElement);
+
+                // 当 HLS 清单解析完成，可以开始播放视频
+                hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                    // 隐藏“加载中”提示，显示视频容器
+                    loadingContainer.style.display = 'none';
+                    videoContainer.style.display = 'block';
+
+                    // 尝试开始播放（若浏览器策略不允许，会在控制台报 warning）
+                    videoElement.play().catch(err => {
+                        console.warn('自动播放被阻止：', err);
+                    });
+                });
+
+                // 可选：监听 HLS 错误，显示友好提示
+                hls.on(Hls.Events.ERROR, (event, data) => {
+                    console.error('HLS 播放出错: ', data);
+                    const msgEl = loadingContainer.querySelector('.loading-message');
+                    if (msgEl) {
+                        msgEl.textContent = '视频加载失败，请稍后重试。';
+                    }
+                });
+            }
+            // 情况二：浏览器原生支持 HLS（主要是 Safari）
+            else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
+                videoElement.src = hlsUrl;
+
+                // 当元数据加载完成后，开始播放
+                videoElement.addEventListener('loadedmetadata', () => {
+                    loadingContainer.style.display = 'none';
+                    videoContainer.style.display = 'block';
+
+                    videoElement.play().catch(err => {
+                        console.warn('自动播放被阻止：', err);
+                    });
+                });
+            }
+            // 情况三：既不支持 Hls.js，也不支持原生 HLS
+            else {
+                const msgEl = loadingContainer.querySelector('.loading-message');
+                if (msgEl) {
+                    msgEl.textContent = '当前浏览器不支持 HLS 视频播放，请尝试使用最新版 Chrome、Edge 或 Safari。';
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-CN" dir="ltr">
+<head>
+    <!-- 页面标题：显示在浏览器标签页上 -->
+    <title>WebGL Gaussian Splat Viewer</title>
+
+    <!-- 设置网页字符编码为 UTF-8（支持中文） -->
+    <meta charset="utf-8" />
+
+    <!-- 移动端 viewport 配置，禁止用户缩放，提升 WebGL 渲染兼容性 -->
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no"
+    />
+
+    <!-- iOS Safari 全屏模式支持 -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <style>
+        /* =========================================================================
+           基础页面样式
+           ========================================================================= */
+
+        /* 全屏渲染、无滚动条、纯黑背景，适合 WebGL 展示 */
+        body {
+            overflow: hidden; /* 禁止滚动 */
+            margin: 0;
+            height: 100vh;
+            width: 100vw;
+            background: black;
+            font-family: sans-serif;
+            color: white;
+            text-shadow: 0 0 3px black; /* 白字在亮背景时增强可读性 */
+        }
+
+        a, body {
+            color: white; /* 链接和文字颜色统一设置为白色 */
+        }
+
+        /* =========================================================================
+           左上角信息介绍面板（标题 + 历史介绍）
+           ========================================================================= */
+        #info {
+            position: absolute;
+            top: 10px;
+            left: 15px;
+            z-index: 100; /* 高层级，让它浮在 canvas 上 */
+            max-width: 300px; /* 控制文本宽度，更美观 */
+        }
+
+        h3, p {
+            margin: 5px 0;
+        }
+        p {
+            font-size: small;
+            line-height: 1.4;
+        }
+
+        /* =========================================================================
+           返回按钮样式（右上角）
+           ========================================================================= */
+        #return-button {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background-color: #ff5733; /* 醒目的橙红色 */
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: medium;
+            z-index: 1000; /* 确保盖住所有元素 */
+        }
+        #return-button:hover {
+            background-color: #ff4511; /* 悬停时更亮 */
+        }
+    </style>
+</head>
+
+<body>
+
+    <!--
+        ============================================================================
+        返回按钮（右上角）
+        点击后跳回电子博物馆页面（museum.html）
+        ============================================================================
+    -->
+    <button id="return-button" onclick="goBack()">返回</button>
+
+    <!--
+        ============================================================================
+        HuggingFace Spaces 特殊样式处理
+        用于某些线上环境的兼容性调整（你本地不会触发）
+        ============================================================================
+    -->
+    <script>
+        if (location.host.includes('hf.space')) {
+            document.body.classList.add('nohf');
+        }
+    </script>
+
+    <!--
+        ============================================================================
+        信息面板（左上角）
+        包含：标题、历史介绍、与海上丝绸之路的关系
+        ============================================================================
+    -->
+    <div id="info">
+        <h1>宁波庆安会馆</h1>
+
+        <p>宁波庆安会馆，位于宁波市三江口东岸，始建于清道光三十年（1850年），落成于咸丰三年（1853年）。</p>
+        <p>是中国八大天后宫和七大会馆之一，是海上丝绸之路文化的重要见证。</p>
+
+        <h2>与大运河和海上丝绸之路的关系</h2>
+
+        <p>宁波港作为大运河南端的出海口，是海上丝绸之路的重要起点之一。</p>
+        <p>庆安会馆的建立体现了宁波港口贸易的繁荣以及文化交流的活跃。</p>
+        <p>其“船史展”展示了宁波船舶发展的历史，是海丝贸易重要载体文化的代表。</p>
+    </div>
+
+    <!--
+        ============================================================================
+        GS Viewer 内部使用的一些 UI 元素（加载进度、提示、旋转立方体）
+        ============================================================================
+        这些元素通常在 load_gs_scene.js 中进行控制（动态显示/隐藏）
+    -->
+    <div id="progress"></div>
+
+    <div id="message"></div>
+
+    <!-- 加载动画（旋转立方体） -->
+    <div class="scene" id="spinner">
+        <div class="cube-wrapper">
+            <div class="cube">
+                <div class="cube-faces">
+                    <div class="cube-face bottom"></div>
+                    <div class="cube-face top"></div>
+                    <div class="cube-face left"></div>
+                    <div class="cube-face right"></div>
+                    <div class="cube-face back"></div>
+                    <div class="cube-face front"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--
+        ============================================================================
+        WebGL 渲染画布（GS 模型就是渲染在这里）
+        ============================================================================
+    -->
+    <canvas id="canvas"></canvas>
+
+    <!-- 显示性能（FPS） -->
+    <div id="quality">
+        <span id="fps"></span>
+    </div>
+
+    <!-- 显示相机信息（位置、角度） -->
+    <div id="caminfo">
+        <span id="camid"></span>
+    </div>
+
+    <!--
+        ============================================================================
+        返回按钮逻辑
+        点击后跳回 museum.html
+        ============================================================================
+    -->
+    <script>
+        function goBack() {
+            window.location.href = '../museum.html'; 
+        }
+    </script>
+
+    <!--
+        ============================================================================
+        核心：Gaussian Splatting 渲染逻辑
+        加载模型、渲染效果、交互控制都在这里实现
+        这是页面最重要的 JS 文件
+        ============================================================================
+    -->
+    <script src="load_gs_scene.js"></script>
+
+</body>
+</html>

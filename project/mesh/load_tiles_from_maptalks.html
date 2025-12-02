@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TilesRenderer Test</title>
+  <!-- 加载 Three.js -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+  <script src="https://unpkg.com/@nasa-ammos/3d-tiles-renderer@latest/build/3d-tiles-renderer.min.js"></script>
+  <!-- 加载 3D Tiles Renderer -->
+  <script src="../3DTilesRendererJS/src/three/TilesRenderer.js"></script>
+</head>
+<body>
+    <script type="module">
+    import { TilesRenderer } from '../3DTilesRendererJS/src/three/TilesRenderer.js';
+      
+    // 测试 TilesRenderer 是否加载成功
+    console.log(typeof TilesRenderer); // 应输出 "function"
+
+    // 初始化 Three.js 渲染器
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 0, 10);
+
+    // 加载 3D Tiles 数据
+    const tilesRenderer = new TilesRenderer('./path_to_your_tileset/tileset.json');
+    tilesRenderer.setCamera(camera);
+    tilesRenderer.setResolutionFromRenderer(camera, renderer);
+
+    scene.add(tilesRenderer.group);
+
+    // 渲染循环
+    function renderLoop() {
+      requestAnimationFrame(renderLoop);
+      camera.updateMatrixWorld();
+      tilesRenderer.update();
+      renderer.render(scene, camera);
+    }
+
+    renderLoop();
+  </script>
+</body>
+</html>

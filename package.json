@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "3d-tiles-renderer": "^0.3.41",
+    "three": "^0.171.0"
+  }
+}

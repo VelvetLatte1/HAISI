@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Tiles Viewer</title>
+    <!-- 引入 Cesium 核心库 -->
+    <script src="https://cesium.com/downloads/cesiumjs/releases/1.97/Build/Cesium/Cesium.js"></script>
+    <link href="https://cesium.com/downloads/cesiumjs/releases/1.97/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+    <style>
+        /* 设置 Cesium 容器的样式，使其全屏显示 */
+        html, body, #cesiumContainer {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <!-- Cesium 地图显示容器 -->
+    <div id="cesiumContainer"></div>
+    
+    <script>
+        // 初始化 Cesium Viewer
+        //Cesium.Ion.defaultAccessToken =  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJjYzU3NTM5ZS05MDFmLTQ2OTktYThiYS01MGMxMzhlZjE1ZTMiLCJpZCI6MjQ5ODQxLCJpYXQiOjE3Mjk1Njg4MDd9.sK0tukMAjxAxeN605Cd622H4DjYe9mHWpLS-Wk-fCJo';
+
+        const viewer = new Cesium.Viewer('cesiumContainer', {
+            terrainProvider: Cesium.createWorldTerrain(), // 添加地形
+            scene3DOnly: true, // 仅使用 3D 场景
+            animation: false, // 关闭动画控制
+            timeline: false,  // 关闭时间轴
+            baseLayerPicker: false // 关闭底图选择器
+        });
+
+        // 加载 3D Tiles 数据
+        const tileset = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+            url: '../../public/jingdian_tiles/ship/tileset.json' // 替换为你的 3D Tiles 文件路径
+        }));
+
+        // 自动适配模型视图
+        tileset.readyPromise.then(function() {
+            viewer.zoomTo(tileset);
+        }).catch(function(error) {
+            console.error('Error loading 3D Tiles:', error);
+        });
+    </script>
+</body>
+</html>

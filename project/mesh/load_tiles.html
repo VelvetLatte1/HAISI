@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CesiumJS 3D Tiles Example</title>
+    <!-- 引入 Cesium 核心库 -->
+    <script src="https://cesium.com/downloads/cesiumjs/releases/1.97/Build/Cesium/Cesium.js"></script>
+    <link href="https://cesium.com/downloads/cesiumjs/releases/1.97/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+    <style>
+        /* 设置 Cesium 容器的样式，使其全屏显示 */
+        #cesiumContainer {
+            width: 100%;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        
+        /* 创建一个空的元素用于隐藏水印 */
+        #cesiumCreditContainer {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- 用于 Cesium 地图显示的容器 -->
+    <div id="cesiumContainer"></div>
+    <!-- 隐藏水印的容器 -->
+    <div id="cesiumCreditContainer"></div>
+
+    <script>
+        // 设置有效的 Cesium ion Access Token
+        Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJjYzU3NTM5ZS05MDFmLTQ2OTktYThiYS01MGMxMzhlZjE1ZTMiLCJpZCI6MjQ5ODQxLCJpYXQiOjE3Mjk1Njg4MDd9.sK0tukMAjxAxeN605Cd622H4DjYe9mHWpLS-Wk-fCJo';
+
+        // 初始化 Cesium Viewer
+        const viewer = new Cesium.Viewer('cesiumContainer', {
+            terrainProvider: Cesium.createWorldTerrain(),
+            scene3DOnly: true,
+            selectionIndicator: false,
+            baseLayerPicker: false,
+            timeline: true,
+            animation: true, // 显示动画控制
+            creditContainer: 'cesiumCreditContainer'
+        });
+
+        // 启用全球光照
+        viewer.scene.globe.enableLighting = true;
+        // 调整地球的亮度效果
+        viewer.scene.globe.dynamicAtmosphereLighting = true;
+        viewer.scene.globe.dynamicAtmosphereLightingFromSun = true;
+
+        // 增强太阳光强度
+        viewer.scene.light.intensity = 5.0; // 增加光照强度
+
+        // 设置时间轴的流动速度（加速时间变化）
+        viewer.clock.multiplier = 4800; // 时间加速为 1000 倍
+        viewer.clock.shouldAnimate = true; // 开启时间流动
+        
+        // 加载 3D Tiles 数据
+        const tileset = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+            url: '../../public/sanjiangkou/tileset.json'
+        }));
+        tileset.style = new Cesium.Cesium3DTileStyle({
+            color: 'color("white") * 1.0' // 增加亮度
+        });
+
+        // 自动适配模型的视图范围，确保模型完整展示
+        tileset.readyPromise.then(function() {
+            viewer.zoomTo(tileset);
+        }).catch(function(error) {
+            console.error('Error loading 3D Tiles:', error);
+        });
+
+        // 调整相机视图
+        viewer.scene.camera.setView({
+            destination: Cesium.Cartesian3.fromDegrees(121.543990, 29.873390, 500),
+            orientation: {
+                heading: Cesium.Math.toRadians(0),
+                pitch: Cesium.Math.toRadians(-45),
+                roll: 0
+            }
+        });
+    </script>
+</body>
+</html>
