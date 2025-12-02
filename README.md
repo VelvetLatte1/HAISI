@@ -50,34 +50,7 @@ npm install
 
 项目约定：**运行时加载的数据统一存放在仓库根目录的 `public/` 文件夹**。
 
-如果没有该目录，请手动创建：
 
-```bash
-mkdir -p public
-```
-
-推荐的目录结构（可根据实际需求调整）：
-
-```text
-public/
-  data/        # 各类业务数据：JSON / GeoJSON / CSV 等
-  images/      # 图片资源：图标、底图、图例等
-  config/      # 配置类 JSON：图层配置、样式配置等
-  tiles/       # 可选：地图切片 / 栅格数据等
-```
-
-在代码中通常类似这样访问数据：
-
-```js
-// 示例：从 public/data 目录读取数据
-fetch('public/data/example.json')
-  .then(res => res.json())
-  .then(data => {
-    // 在地图或场景上渲染数据 …
-  });
-```
-
-> ⚠️ **务必确保**：`main.js` 中使用的路径（例如 `public/data/xxx.json`）与实际文件所在路径一致，否则会出现 404。
 
 ---
 
@@ -136,40 +109,6 @@ npm run start
 
 即可启动项目。
 
----
-
-## 数据存储约定：`public/` 目录
-
-为了避免跨域和路径问题，**建议所有需要在前端通过 `fetch` / `XMLHttpRequest` 加载的静态数据，都放在 `public/` 目录下**，例如：
-
-```text
-public/
-  data/
-    ships.geojson
-    ports.json
-    stats.csv
-  images/
-    logo.png
-    legend.png
-  config/
-    layers.json
-    styles.json
-  tiles/
-    {z}/{x}/{y}.png   # 若有自定义瓦片
-```
-
-在本地开发环境下，对应访问路径为：
-
-* `http://localhost:8080/public/data/ships.geojson`
-* `http://localhost:8080/public/images/logo.png`
-* `http://localhost:8080/public/config/layers.json`
-
-只要 `http-server` 的根目录是项目根目录（`.`），`public/` 下的文件都能以上述路径访问。
-
-在生产环境中，也可以将整个项目（或构建后的目录）放到 Nginx / Apache / OSS / S3 等静态服务器上，`public/` 的路径规则同理。
-
----
-
 ## 项目结构与各文件说明
 
 仓库根目录大致结构如下（以当前仓库为例）：
@@ -182,7 +121,7 @@ HAISI/
   project/
   scripts/
     Cesium/
-  public/              # 建议创建，用于存放运行时数据（需自行添加）
+  public/              # 下载数据
   index.html
   main.js
   package.json

@@ -749,7 +749,7 @@ async function main() {
     //     params.get("url") || "treehill.splat",
     //     "https://huggingface.co/cakewalk/splat-data/resolve/main/",
     // );
-    const url = "../../public/splat/qingan.splat";
+    const url = "../../public/splat/qingan.splat"; //设置需要加载的splat场景
     
     const req = await fetch(url, {
         mode: "cors", // no-cors, *cors, same-origin

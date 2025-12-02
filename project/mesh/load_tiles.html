@@ -57,7 +57,7 @@
         viewer.clock.multiplier = 4800; // 时间加速为 1000 倍
         viewer.clock.shouldAnimate = true; // 开启时间流动
         
-        // 加载 3D Tiles 数据
+        // 加载 3D Tiles 数据,设置不同的路径用以加载不同的场景
         const tileset = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
             url: '../../public/sanjiangkou/tileset.json'
         }));
