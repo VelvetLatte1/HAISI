@@ -280,15 +280,14 @@ HAISI/
 
 ---
 
-#### `public/`（需手动创建）
+#### `public/`（需下载）
 
 * **运行时数据与静态资源目录**，供前端通过 HTTP 访问。
 * 建议存放：
 
-  * 业务数据：`public/data/*.json`、`*.geojson`、`*.csv` 等；
+  * 3dgs场景：`public/splat/*.splat` 等；
   * 图片：`public/images/*.png`、`*.jpg`；
-  * 配置文件：`public/config/*.json`；
-  * 大体量地图瓦片或栅格：`public/tiles/...`。
+  * mesh场景：`public/sanjiangkou/`、`public/jingdian_tiles/ship`。
 
 公共约定：**前端代码里用的路径以 `public/` 开头**，方便统一管理。
 
@@ -300,75 +299,6 @@ HAISI/
 * **不要手动修改**，也不应提交到 Git（已在 `.gitignore` 中忽略）。
 
 ---
-
-## 开发与二次扩展建议
-
-1. **增加新的数据图层**
-
-   * 将新数据放入 `public/data/`；
-   * 在 `main.js` 中添加对应的 `fetch` 逻辑；
-   * 将数据转换为 maptalks 图层或 Cesium 实体后加入场景。
-
-2. **抽离可配置部分**
-
-   * 将图层列表、颜色样式、阈值等抽成 JSON 放在 `public/config/`；
-   * 由 `main.js` 动态读取配置并生成图层，可简化后续调参。
-
-3. **引入/扩展 3D 场景（Cesium）**
-
-   * 确保 `index.html` 正确引入 `scripts/Cesium/` 下的相关 JS/CSS；
-   * 在 `main.js` 中初始化 `Cesium.Viewer`，根据需要从 `public/` 加载 3D Tiles、地形数据等；
-   * 可实现 2D/3D 联动或单独的三维可视化场景。
-
-4. **构建生产环境（可选）**
-
-   * 当前项目可直接以静态文件部署；
-   * 若后期代码复杂，可引入构建工具（如 Vite / Webpack / Rollup）对 `main.js` 等进行打包、压缩；
-   * 打包结果通常输出到 `dist/`，再由静态服务器托管。
-
----
-
-## 常见问题（FAQ）
-
-### 1. 打开 `http://localhost:8080` 是空白页怎么办？
-
-* 确认是通过 `http-server` 访问，而不是直接用浏览器打开 `index.html` 的 `file://` 路径；
-* 打开浏览器控制台（F12 → Console / Network）：
-
-  * 如果有资源 404，检查：
-
-    * `public/` 目录是否存在；
-    * 数据文件是否放对位置；
-    * `main.js` 中的路径是否与实际一致。
-
----
-
-### 2. 修改了 JS 或数据文件，刷新后没变化？
-
-* 启动命令需要加 `-c-1` 禁用缓存：
-
-  ```bash
-  npx http-server . -p 8080 -c-1
-  ```
-
-* 或在浏览器中使用「强制刷新」：
-
-  * Windows：`Ctrl + F5`
-  * macOS：`Cmd + Shift + R`
-
----
-
-### 3. 提示端口 8080 已被占用？
-
-* 换一个端口即可，例如：
-
-  ```bash
-  npx http-server . -p 8081 -c-1
-  ```
-
----
-
-> 如果你在科研或业务中有更具体的场景（如海上目标监测、海事交通分析等），可以在本 README 顶部「项目简介」部分进一步补充说明，以便协作人员快速理解项目背景和用途。
 
 ```
 ::contentReference[oaicite:0]{index=0}
